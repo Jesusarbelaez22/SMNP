@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoreo SNMP</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Monitoreo SNMP</h1>
+
+    {% if message %}
+        <p>{{ message }}</p>
+    {% else %}
+        <div id="memory-physical-chart"></div>
+        <div id="memory-virtual-chart"></div>
+
+        <!-- Inyecta los datos como JSON en el HTML -->
+        <script type="application/json" id="timestamps-data">{{ timestamps|tojson|safe }}</script>
+        <script type="application/json" id="memory-physical-values-data">{{ memory_physical_values|tojson|safe }}</script>
+        <script type="application/json" id="memory-virtual-values-data">{{ memory_virtual_values|tojson|safe }}</script>
+
+        <!-- Incluye el archivo JavaScript externo -->
+        <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% endif %}
+</body>
+</html>
