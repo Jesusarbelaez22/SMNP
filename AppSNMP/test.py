@@ -2,7 +2,7 @@ import subprocess
 import os
 
 # Configuración SNMP
-SNMP_TARGET = "127.0.0.1","192.168.56.101"
+SNMP_TARGET = ["127.0.0.1", "192.168.56.101"]
 COMMUNITY_STRING = "interyr3d"
 MEMORY_PHYSICAL_OID = ".1.3.6.1.2.1.25.2.3.1.6.3"
 SNMPGET_PATH = r"C:\Users\Ordon\Downloads\SnmpGet\SnmpGet.exe"  # Ruta completa al archivo snmpget.exe

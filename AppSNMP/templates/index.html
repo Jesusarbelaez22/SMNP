@@ -1,27 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoreo SNMP</title>
+    <title>Monitor de Memoria</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-    <h1>Monitoreo SNMP</h1>
+    <h1>Monitor de Uso de Memoria</h1>
 
-    {% if message %}
-        <p>{{ message }}</p>
-    {% else %}
-        <div id="memory-physical-chart"></div>
-        <div id="memory-virtual-chart"></div>
+    <!-- Formulario para filtrar por fecha -->
+    <form id="date-filter-form">
+        <label for="start_date">Desde:</label>
+        <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
+        <label for="end_date">Hasta:</label>
+        <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
+        <button type="submit">Filtrar</button>
+    </form>
 
-        <!-- Inyecta los datos como JSON en el HTML -->
-        <script type="application/json" id="timestamps-data">{{ timestamps|tojson|safe }}</script>
-        <script type="application/json" id="memory-physical-values-data">{{ memory_physical_values|tojson|safe }}</script>
-        <script type="application/json" id="memory-virtual-values-data">{{ memory_virtual_values|tojson|safe }}</script>
+    <div id="memory-physical-chart"></div>
+    <div id="memory-virtual-chart"></div>
 
-        <!-- Incluye el archivo JavaScript externo -->
-        <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    {% endif %}
+    <!-- Datos ocultos para JavaScript -->
+    <script>
+        var timestamps = {{ timestamps | tojson }};
+        var memory_physical_values = {{ memory_physical_values | tojson }};
+        var memory_virtual_values = {{ memory_virtual_values | tojson }};
+    </script>
+
+    <script>
+        // Función para actualizar los gráficos
+        function actualizarGraficos() {
+            // Convertir fechas a formato legible en la zona horaria local (Bogotá)
+            timestamps = timestamps.map(timestamp => {
+                return new Date(timestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+            });
+
+            if (timestamps.length > 0) {
+                // Gráfico de Uso de Memoria Física
+                Plotly.newPlot('memory-physical-chart', [{
+                    x: timestamps,
+                    y: memory_physical_values,
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    name: 'Uso de Memoria Física (%)'
+                }], {
+                    title: 'Historial de Uso de Memoria Física',
+                    xaxis: { title: 'Tiempo' },
+                    yaxis: { title: 'Uso de Memoria Física (%)' }
+                });
+
+                // Gráfico de Uso de Memoria Virtual
+                Plotly.newPlot('memory-virtual-chart', [{
+                    x: timestamps,
+                    y: memory_virtual_values,
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    name: 'Uso de Memoria Virtual (%)'
+                }], {
+                    title: 'Historial de Uso de Memoria Virtual',
+                    xaxis: { title: 'Tiempo' },
+                    yaxis: { title: 'Uso de Memoria Virtual (%)' }
+                });
+            } else {
+                document.body.innerHTML += "<p>No hay datos disponibles para mostrar.</p>";
+            }
+        }
+
+        // Inicializar los gráficos
+        actualizarGraficos();
+
+        // Manejar envío del formulario
+        document.getElementById('date-filter-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;
+            window.location.href = `/?start_date=${startDate}&end_date=${endDate}`;
+        });
+    </script>
 </body>
 </html>
